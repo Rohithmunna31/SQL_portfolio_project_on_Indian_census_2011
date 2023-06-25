@@ -149,10 +149,36 @@ select sum(area_km2) total_area from project..data2)z) r on q.keyy=r.keyy)g
 
 --window 
 
-output top 3 districts from each state with highest literacy rate
+-- output top 3 districts from each state with highest literacy rate
 
 
 select a.* from
 (select district,state,literacy,rank() over(partition by state order by literacy desc) rnk from project..data1) a
 
 where a.rnk in (1,2,3) order by state
+
+
+-- creating a stored procedure
+-- to know average growth of a state by a stored procedure and temp table 
+
+create table #temp_table(
+State varchar(100),
+avg_growth float,
+)
+
+
+insert into #temp_table 
+select d.[State ],avg(growth) from Project..Data1 as d
+group by d.State
+
+-- stored procedure is created to know average growth of a state 
+create procedure test3
+@state varchar(100)
+as 
+select * from #temp_table as t1
+where t1.State = @state
+
+-- to know average growth of Andhra pradesh 
+exec test3 @state = 'Andhra Pradesh'
+
+
